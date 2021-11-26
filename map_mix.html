@@ -8,17 +8,20 @@
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
     <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
 
-    <style type="text/css">
-        path {fill: rgb(128, 72, 72); stroke: rgb(61, 60, 60); stroke-width: 1;}
+    <style>
+        path.active {
+        fill: pink;
+        }
     </style>
+
 </head>
 <body>
     <svg id="my_dataviz" width="400" height="300"></svg>
 
     <script>
         // Parameters
-        var width		= 750,
-            height		= 750,
+        var width		= 1000,
+            height		= 1000,
             scale		= 8500,
             centerLat		= 5.5,	
             centerLong  	= 52.2;	 
@@ -28,19 +31,56 @@
             .attr("width", width)
             .attr("height", height)
             .append("g")
-        
-        // Adjust projection based on scale and center of the map 
-        var projection = d3.geoMercator().scale(scale).translate([width / 2, height / 2]).center([centerLat, centerLong]);
-        var path = d3.geoPath()
-          .projection(projection);
-        
-        // Add the data 
-        d3.json("./data/provinces.geojson", function(json) {
-        svg.selectAll("path")
-            .data(json.features).enter()
-            .append("path")
-            .attr("d", path)
-        });
-        </script>
+
+
+        d3.queue()
+            .defer(d3.json, "./data/nl.json")
+            .defer(d3.json, "./data/provinces.geojson")
+            .await(ready);
+            
+        function ready(error, municipalities, provinces){
+            if (error) throw error;
+
+            var projection = d3.geoMercator().scale(scale).translate([width / 2, height / 2]).center([centerLat, centerLong]);
+            var path = d3.geoPath()
+                .projection(projection);
+
+
+
+            // Add the data 
+            d3.json("./data/provinces.geojson", function(json) {
+            svg.selectAll("path")
+                .data(json.features).enter()
+                .append("path")
+                .attr("d", path)
+
+                .style("fill", "none")
+                .style("opacity", 1)
+                .attr("stroke", "black")
+                .attr("class", function(d){ return "province" } )
+                .attr('pointer-events', 'all')
+                .on("mouseenter", function(d) {
+                    d3.select(this).style("fill", "red")
+                        .attr('fill-opacity', 0.3);
+                })                  
+                .on("mouseout", function(d) {
+                    d3.select(this).style("fill", "none")
+                        .attr('fill-opacity', 1);
+                });
+             });      
+             
+            // Add the data 
+            d3.json("./data/nl.json", function(json) {
+            svg.selectAll("path")
+                .data(json.features).enter()
+                .append("path")
+                .attr("d", path)
+                .style("fill", "green")
+                .style("stroke", "green")
+                .style("opacity", 0.1)
+                .attr('pointer-events', 'none')
+            });   
+        }
+    </script>
 </body>
 </html>
