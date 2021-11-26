@@ -40,7 +40,24 @@
             .data(json.features).enter()
             .append("path")
             .attr("d", path)
-        });
+
+            .style("fill", "none")
+            .style("opacity", 1)
+            .attr("stroke", "black")
+
+            .attr("class", function(d){ return "province" } )
+            .attr('pointer-events', 'all')
+            .on("mouseenter", function(d) {
+                d3.select(this).style("fill", "red")
+                    .attr('fill-opacity', 0.4);
+                    
+            })                  
+            .on("mouseout", function(d) {
+                d3.select(this).style("fill", "none")
+                    .attr('fill-opacity', 1);
+            });
+            });      
+
         </script>
 </body>
 </html>
