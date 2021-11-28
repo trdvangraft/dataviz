@@ -1,69 +1,8 @@
-// // set the dimensions and margins of the graph
 const margin = {top: 10, right: 30, bottom: 30, left: 60}
 const width = 460 - margin.left - margin.right
 const height = 400 - margin.top - margin.bottom
 const inner_width  = width;
 const inner_height = height;
-
-// // append the svg object to the body of the page
-// var svg = d3.select("#economic_growth")
-//   .append("svg")
-//     .attr("width", width + margin.left + margin.right)
-//     .attr("height", height + margin.top + margin.bottom)
-//   .append("g")
-//     .attr("transform",
-//           "translate(" + margin.left + "," + margin.top + ")");
-
-
-// d3.dsv(" ", "./data/GDP_NL.csv").then((data) => {
-//     // Add X axis --> it is a date format
-//     console.info(data)
-    
-//     // Add Y axis
-//     var yScale = d3.scaleLinear()
-//         .domain([d3.min(data, d => +d.growth), d3.max(data, d => +d.growth)])
-//         .range([ height, 0 ]);
-        
-//     var xScale = d3.scaleTime()
-//         .domain(d3.extent(data, d => d3.timeParse("%Y-%m-%d")(d.date)))
-//         .range([ 0, width ]);
-    
-//     const x = d3.scaleLinear().domain([0, 1]).range([0, inner_width]);
-//     const y = d3.scaleLinear().domain([0, 1]).range([inner_height, 0]);
-//     const xAxisGrid = d3.axisBottom(x).tickSize(-inner_height).tickFormat('').ticks(14);
-//     const yAxisGrid = d3.axisLeft(y).tickSize(-inner_width).tickFormat('').ticks(12);
-
-//     // Create grids.
-//     svg.append('g')
-//         .attr('class', 'x axis-grid')
-//         .attr('transform', 'translate(0,' + inner_height + ')')
-//         .call(xAxisGrid);
-
-//     svg.append('g')
-//         .attr('class', 'y axis-grid')
-//         .call(yAxisGrid);
-    
-//     // Create axis
-//     svg.append("g").call(d3.axisLeft(yScale));
-//     svg.append("g").attr("transform", `translate(0, ${height})`).call(d3.axisBottom(xScale))
-
-//     // Add the line
-//     svg.append("path")
-//         .datum(data)
-//         .attr("fill", "none")
-//         .attr("stroke", "steelblue")
-//         .attr("stroke-width", 3.5)
-//         .attr("d", 
-//             d3.line()
-//                 .x(d => xScale(d3.timeParse("%Y-%m-%d")(d.date)))
-//                 .y(d => yScale(+d.growth))
-//         )
-// })
-// //Read the data
-// // When reading the csv, I must format variables:
-// // function(d){
-// //     return { date : d3.timeParse("%Y-%m-%d")(d.date), value : d.value }
-// // }
 
 function AnimatedScatter({
     x = ([x]) => x, // given d in data, returns the (quantitative) x-value
@@ -73,7 +12,7 @@ function AnimatedScatter({
     orient = () => "bottom", // given d in data, returns a label orientation (top, right, bottom, left)
     defined, // for gaps in data
     curve = d3.curveCatmullRom, // curve generator for the line
-    width = 640, // outer width, in pixels
+    width = 760, // outer width, in pixels
     height = 400, // outer height, in pixels
     marginTop = 20, // top margin, in pixels
     marginRight = 20, // right margin, in pixels
@@ -101,14 +40,32 @@ function AnimatedScatter({
     strokeLinejoin = "round", // stroke line join of line
     halo = "#fff", // halo color for the labels
     haloWidth = 6, // halo width for the labels
-    duration = 0 // intro animation in milliseconds (0 to disable)
+    duration = 0, // intro animation in milliseconds (0 to disable)
+    figureWidth = "100%",
   } = {}) {
     const svg = d3.select("#economic_growth")
         .append("svg")
-        .attr("width", width)
+        .attr("width", figureWidth)
         .attr("height", height)
         .attr("viewBox", [0, 0, width, height])
-        .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
+        .attr("style", "max-width: 100%; height: auto; height: intrinsic; touch-action: none; ");
+    
+    const div = d3.select("div.main").append("div")
+        .attr("class", "card")
+        .attr("style", "opacity: 0; width: 14rem; font-size: 60%")
+
+    const tooltip_formatter = (data) => {
+        return `
+            <div class="card-body">
+                <h5 class="card-title">Major events</h5>
+                <p class="card-text">Testing some new information about a major crisis</p>
+            </div>
+            <ul class="list-group list-group-flush" style="font-size: 90%">
+                <li class="list-group-item py-1">Total gdp: ${data.gdp} million</li>
+                <li class="list-group-item py-1">Gdp growth: ${parseFloat(data.growth).toFixed(2)}%</li>
+            </ul>
+        `
+    }
 
     d3.dsv(" ", "./data/GDP_NL.csv").then((data) => {
         console.info(data)
@@ -122,13 +79,13 @@ function AnimatedScatter({
         const D = d3.map(data, defined);
     
         // Compute default domains.
-        if (xDomain === undefined) xDomain = d3.nice(...d3.extent(X), width / 80);
+        if (xDomain === undefined) xDomain = d3.nice(...d3.extent(X), width / data.length);
         if (yDomain === undefined) yDomain = d3.nice(...d3.extent(Y), height / 50);
     
         // Construct scales and axes.
         const xScale = xType(xDomain, xRange)
         const yScale = yType(yDomain, yRange);
-        const xAxis = d3.axisBottom(xScale).ticks(width / 80, xFormat);
+        const xAxis = d3.axisBottom(xScale).ticks(width / data.length, xFormat);
         const yAxis = d3.axisLeft(yScale).ticks(height / 50, yFormat);
     
         svg.append("g")
@@ -183,7 +140,19 @@ function AnimatedScatter({
             .join("circle")
             .attr("cx", i => xScale(X[i]))
             .attr("cy", i => yScale(Y[i]))
-            .attr("r", r);
+            .attr("r", r)
+            .on('mouseover', function (event, i) {
+                d3.select(this).transition().duration('50').attr('opacity', '0.85')
+                div.transition().duration(10).style("opacity", 1)
+                event.preventDefault()
+                console.log(event)
+                console.log(data[i])
+                div.html(tooltip_formatter(data[i])).style("left", (event.pageX) + "px").style("top", `calc(${event.pageY}px + 100vh + 10px)`)
+            })
+            .on('mouseout', function (event, i) {
+                d3.select(this).transition().duration('50').attr('opacity', '1')
+                div.transition().duration(10).style("opacity", 0)
+            });
     
         const label = svg.append("g")
             .attr("font-family", "sans-serif")
@@ -193,8 +162,6 @@ function AnimatedScatter({
             .data(I.filter(i => D[i]))
             .join("g")
             .attr("transform", i => `translate(${xScale(X[i])},${yScale(Y[i])})`);
-
-        console.warn(T)
     
         if (T) label.append("text")
             .text(i => T[i])
@@ -244,13 +211,12 @@ function AnimatedScatter({
 AnimatedScatter({
     x: d => d3.timeParse("%Y-%m-%d")(d.date),
     y: d => +d.growth,
-    title: d => Math.floor(d.growth),
     yFormat: ".2f",
     xType: d3.scaleTime,
     xLabel: "Date",
     yLabel: "Growth w.r.t. base year 1995 (per year per quarter (%))",
-    height: 400,
-    duration: 5000 // for the intro animation; 0 to disable
+    height: 300,
+    duration: 10000 // for the intro animation; 0 to disable
   })
 
 

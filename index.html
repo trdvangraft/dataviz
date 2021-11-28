@@ -28,9 +28,9 @@
         <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script><![endif]-->
 
-    <script src="https://d3js.org/d3.v4.min.js"></script>
-    <script src="https://d3js.org/d3-dsv.v1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <!-- <script src="https://d3js.org/d3-dsv.v1.min.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/d3@7"></script> -->
 
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
     <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
@@ -57,7 +57,7 @@
         <div class="d-flex h-100 align-items-center">
           <div class="container">
             <div class="row align-items-center">
-              <div class="col-lg-6 mb-4 mb-lg-0">
+              <div class="col-lg-12 mb-4 mb-lg-0">
                 <header class="text-center">
                   <h2 class="text-uppercase lined">Economic Crises and Mental Health</h2>
                 </header>
@@ -65,49 +65,26 @@
                 <p>Many studies have hypohtesized the effect of an economic crisis on mental health. We are currently amidst an economic crisis caused by the spread of the COVID-19 virus. It has definitely taken a toll on the mental health of people all around the world. We will look at the case of the Netherlands and explore the hidden dark side that economic crises have had on the population, province by province.</p>
                 <p>Going through an economic crisis is not easy, in fact many a man has suffered through it. This suffering can spread and manifest on many ways. We will start by looking at what an economic crisis means in terms of GDP decline and how it has affected different provinces in the Netherlands through the years. Later, we will look at how each province has coped with said crises in terms of suicide rates and divorce rates.</p>
               </div>
-              <div class="col-lg-6">
+              <div class="col-lg-12">
                 <div id="economic_growth"></div>
               </div>
             </div>
           </div>
         </div>
       </section>
-      <section class="bg-gray">
+      <section class="bg-gray" id="divorces">
         <div class="d-flex h-100 align-items-center">
           <div class="container">
             <header class="mb-5 text-center">
               <h2 class="text-uppercase lined">Divorces</h2>
             </header>
-            <div class="row text-center">
-              <div class="col-lg-4 col-md-6 mb-4">
-                <div class="icon mb-3"><i class="fas fa-desktop"></i></div>
-                <h4 class="text-uppercase lined lined-compact">Web design</h4>
-                <p class="text-mted">Fifth abundantly made Give sixth hath. Cattle creature i be don't them.</p>
+            
+            <div class="row">
+              <div class="col-lg-6 col-md-6 mb-4">
+                <p>Many studies have hypohtesized the effect of an economic crisis on mental health. We are currently amidst an economic crisis caused by the spread of the COVID-19 virus. It has definitely taken a toll on the mental health of people all around the world. We will look at the case of the Netherlands and explore the hidden dark side that economic crises have had on the population, province by province.</p>
               </div>
-              <div class="col-lg-4 col-md-6 mb-4">
-                <div class="icon mb-3"><i class="fas fa-print"></i></div>
-                <h4 class="text-uppercase lined lined-compact">Print</h4>
-                <p class="text-mted">Advantage old had otherwise sincerity dependent additions. It in adapted natural.</p>
-              </div>
-              <div class="col-lg-4 col-md-6 mb-4">
-                <div class="icon mb-3"><i class="fas fa-globe-americas"></i></div>
-                <h4 class="text-uppercase lined lined-compact">SEO and SEM</h4>
-                <p class="text-mted">Am terminated it excellence invitation projection as. She graceful shy.</p>
-              </div>
-              <div class="col-lg-4 col-md-6 mb-4">
-                <div class="icon mb-3"><i class="far fa-lightbulb"></i></div>
-                <h4 class="text-uppercase lined lined-compact">consulting</h4>
-                <p class="text-mted">Fifth abundantly made Give sixth hath. Cattle creature i be don't them.</p>
-              </div>
-              <div class="col-lg-4 col-md-6 mb-4">
-                <div class="icon mb-3"><i class="far fa-envelope"></i></div>
-                <h4 class="text-uppercase lined lined-compact">Email marketing</h4>
-                <p class="text-mted">Advantage old had otherwise sincerity dependent additions. It in adapted natural.</p>
-              </div>
-              <div class="col-lg-4 col-md-6 mb-4">
-                <div class="icon mb-3"><i class="fas fa-user"></i></div>
-                <h4 class="text-uppercase lined lined-compact">UI &amp; UX</h4>
-                <p class="text-mted">Am terminated it excellence invitation projection as. She graceful shy.</p>
+              <div class="row col-lg-6 col-md-6 mb-4">
+                <div id="normal_divorces"></div>
               </div>
             </div>
           </div>
@@ -172,6 +149,7 @@
     <script src="js/front.js"></script>
 
     <script src="vis_scripts/ecomic_growth.js"></script>
+    <script src="vis_scripts/barchart.js"></script>
     <!-- FontAwesome CSS - loading as last, so it doesn't block rendering-->
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
   </body>
