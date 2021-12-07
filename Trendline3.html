@@ -1,0 +1,139 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <!-- Load d3.js -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <!-- Create a div where the graph will take place -->
+    <div id="my_dataviz"></div>
+    <div id="Dropdown"></div>
+
+</head>
+<body>
+    <script>
+
+
+    // Set the dimensions of the canvas / graph
+    var margin = {top: 30, right: 20, bottom: 70, left: 50},
+    width = 600 - margin.left - margin.right,
+    height = 300 - margin.top - margin.bottom;
+
+    // Set the ranges
+    var x = d3.scaleTime().range([0, width]);  
+    var y = d3.scaleLinear().range([height, 0]);
+
+    // Define the line
+    var line = d3.line()	
+        .x(function(d) { return x(d.Perioden); })
+        .y(function(d) { return y(d.Huwelijkssluitingen); });
+        
+    // Adds the svg canvas
+    var svg = d3.select("body")
+        .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+            .attr("transform", 
+                "translate(" + margin.left + "," + margin.top + ")");
+
+
+
+    //Read the data.
+    d3.csv("data/data_Ruben/Huwen_en_huwelijksontbinding__geslacht__leeftijd__31_december___regio_05122021_231200.csv").then(data => {
+
+    Load_data = data
+
+    Region = Load_data.flatMap(elem => elem['Regio'])
+    allGroup = [...new Set(Region)];
+
+    allGroup = ["Huwelijkssluitingen", "scheidende mannen", "scheidende vrouwen", "weduw man", "weduw vrouw"]
+    
+    // var Variable_prop = "Huwelijkssluitingen"
+    function draw(Variable_prop) {
+        
+        console.log(Load_data)
+        data = Load_data.map(elem => (
+            {
+                Regio: elem.Regio,
+                Perioden: elem.Perioden,
+                [Variable_prop]: elem[Variable_prop]
+            } 
+        ));
+
+        // Scale the range of the data
+        x.domain(d3.extent(data, function(d) { return d.Perioden; }));
+        y.domain([0, 18000]);
+
+
+
+        // Group the entries by symbol
+        dataNest = Array.from(
+            d3.group(data, d => d.Regio), ([Regio, key]) => ({Regio, key})
+        );
+
+        // set the colour scale
+        var color = d3.scaleOrdinal(d3.schemeCategory10);
+        legendSpace = width/dataNest.length; // spacing for the legend
+
+        // Loop through each symbol / key
+        dataNest.forEach(function(d,i) { 
+            svg.append("path")
+                .attr("class", "line")           
+                .attr("d", line(d.key))
+                .attr("fill", "none")
+                .style("stroke", function() { // Add the colours dynamically
+                    return d.color = color(d.Regio); })
+                .attr("stroke-width", 1.5);
+
+            // svg.transition()
+            //    .duration(1000)
+
+            // // Add the Legend
+            // svg.append("text")
+            //     .attr("x", (legendSpace/2)+i*legendSpace)  // space legend
+            //     .attr("y", height + (margin.bottom/2)+ 5)
+            //     .attr("class", "legend")    // style the legend
+            //     .style("fill", function() { // Add the colours dynamically
+            //         return d.color = color(d.Regio); })
+            //     .text(d.key); 
+
+        });
+
+        // Add the X Axis
+        svg.append("g")
+            .attr("class", "axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x));
+
+        // Add the Y Axis
+        svg.append("g")
+            .attr("class", "axis")
+            .call(d3.axisLeft(y));
+
+
+        }
+
+    const yearMenu = d3.select('#Dropdown')
+        .append('select');
+
+    yearMenu.selectAll('option')
+        .data(["Huwelijkssluitingen", "scheidende mannen", "scheidende vrouwen", "weduw man", "weduw vrouw"])
+        .join('option')
+            .attr('value', d => d)
+            .text(d => d);
+
+    yearMenu.on('change', function(event) {
+        console.log(event.target.value)
+        svg.selectAll("path").remove();
+        draw(event.target.value);
+    });
+        
+    draw(yearMenu.property('value'))
+    })
+    
+</script>
+</body>
+</html>
