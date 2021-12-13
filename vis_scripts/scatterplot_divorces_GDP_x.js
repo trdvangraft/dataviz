@@ -1,9 +1,8 @@
-const margin = {top: 10, right: 30, bottom: 30, left: 60}
-const width = 460 - margin.left - margin.right
-const height = 400 - margin.top - margin.bottom
-const inner_width  = width;
-const inner_height = height;
-
+// const margin = {top: 10, right: 30, bottom: 30, left: 60}
+// const width = 460 - margin.left - margin.right
+// const height = 400 - margin.top - margin.bottom
+// const inner_width  = width;
+// const inner_height = height;
 
 
 
@@ -78,8 +77,7 @@ var valueline = d3.line()
 
 var div = d3.select("body").append("div")
      .attr("class", "tooltip")
-     .style("opacity", 0)
-     .style("position","absolute");
+     .style("opacity", 0);
 
 const tooltip_formatter = (data) => {
 return `
@@ -103,16 +101,13 @@ console.log(data)
   .attr("cx", function(d) { return x(d.GDP_Growth); })
   .attr("cy", function(d) { return y(d.total_divorces); })
   .on('mouseover', function (event, i) {
-      console.log(i)
-      console.log(event.pageX)
-      console.log(event.pageY)
           d3.select(this).transition()
                 .duration('100')
                 .attr("r", 7);
           div.transition()
                .duration(100)
                .style("opacity", 1);
-          div.html(tooltip_formatter(i)).style('left', (event.pageX) + 'px').style('top', `calc(${event.pageY}px)`);
+          div.html(tooltip_formatter(i)).style('left', (event.pageX) + 'px').style("top", `calc(${event.pageY}px + 100vh + 10px)`);
      })
      .on('mouseout', function (event, i) {
           d3.select(this).transition()
