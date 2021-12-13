@@ -29,11 +29,11 @@ marriages = data.map(elem => elem['total_divorces'])
 
     svg.append("g")
         .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(x).ticks(9));
+        .call(d3.axisBottom(x).ticks(10));
 
     // Add Y axis
     var y = d3.scaleLinear()
-        .domain([d3.min(marriages), d3.max(marriages)])
+        .domain([-0.4, d3.max(marriages)])
         .range([height, 0 ]);
 
     svg.append("g")
@@ -56,11 +56,12 @@ var valueline = d3.line()
       .call(d3.axisBottom(x));
   // text label for the x axis
   svg.append("text")             
-      .attr("transform",
-            "translate(" + (width/2) + " ," + 
-                           (height + margin.top + 20) + ")")
-      .style("text-anchor", "middle")
-      .text("Yearly GDP Growth (%)");
+        .attr("y", height+ margin.top+17)
+        .attr("x",0 + (2*width / 3))
+        .style("text-anchor", "middle")
+        .style("font-size",'smaller')
+        .text("Yearly GDP Growth (%)");
+
 
   // Add the Y Axis
   svg.append("g")
@@ -69,23 +70,25 @@ var valueline = d3.line()
   svg.append("text")
       .attr("transform", "rotate(-90)")
       .attr("y", 0 - margin.left)
-      .attr("x",0 - (height / 2))
+      .attr("x",0 - (height / 3))
       .attr("dy", "1em")
+      .style("font-size",'smaller')
       .style("text-anchor", "middle")
       .text("Yearly Divorces Growth (%)");  
 
 var div = d3.select("body").append("div")
      .attr("class", "tooltip")
-     .style("opacity", 0);
+     .style("opacity", 0)
+     .style("position","absolute");
 
 const tooltip_formatter = (data) => {
 return `
-    <div class="card-body">
+    <div>
         <p></p>
     </div>
-    <ul class="list-group list-group-flush" style="font-size: 90%">
-        <li class="list-group-item py-1">Total Divorce Growth: ${parseFloat(data.total_divorces).toFixed(2)}% </li>
-        <li class="list-group-item py-1">Gdp growth: ${parseFloat(data.GDP_Growth).toFixed(2)}%</li>
+    <ul style="font-size: 90%">
+        <li>Total yearly divorce growth: ${parseFloat(data.total_divorces).toFixed(2)}% </li>
+        <li>Yearly gdp growth: ${parseFloat(data.GDP_Growth).toFixed(2)}%</li>
     </ul>
     `
 }
@@ -102,18 +105,16 @@ console.log(data)
   .on('mouseover', function (event, i) {
       console.log(i)
       console.log(event.pageX)
+      console.log(event.pageY)
           d3.select(this).transition()
                 .duration('100')
                 .attr("r", 7);
           div.transition()
                .duration(100)
                .style("opacity", 1);
-      event.preventDefault()
-          div.html(tooltip_formatter(i))
-          .style("left", (event.pageX) + "px")
-          .style("top", `calc(${event.pageY}px + 100vh + 10px)`);
+          div.html(tooltip_formatter(i)).style('left', (event.pageX) + 'px').style('top', `calc(${event.pageY}px)`);
      })
-     .on('mouseout', function (d, i) {
+     .on('mouseout', function (event, i) {
           d3.select(this).transition()
                .duration('200')
                .attr("r", 5);
