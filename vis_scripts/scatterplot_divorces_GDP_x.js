@@ -75,21 +75,22 @@ var valueline = d3.line()
       .style("text-anchor", "middle")
       .text("Yearly Divorces Growth (%)");  
 
-var div = d3.select("body").append("div")
-     .attr("class", "tooltip")
-     .style("opacity", 0);
-
-const tooltip_formatter = (data) => {
-return `
-    <div>
-        <p></p>
-    </div>
-    <ul style="font-size: 90%">
-        <li>Total yearly divorce growth: ${parseFloat(data.total_divorces).toFixed(2)}% </li>
-        <li>Yearly gdp growth: ${parseFloat(data.GDP_Growth).toFixed(2)}%</li>
-    </ul>
-    `
-}
+      var div = d3.select("body").append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 1)
+      .style("position","relative");
+ 
+ const tooltip_formatter = (data) => {
+ return `
+     <div class="card-body">
+         <p></p>
+     </div>
+     <ul class="list-group list-group-flush" style="font-size: 90%">
+         <li class="list-group-item py-1">Total yearly marriage growth: ${parseFloat(data.total_divorces).toFixed(2)}% </li>
+         <li class="list-group-item py-1">Yearly gdp growth: ${parseFloat(data.GDP_Growth).toFixed(2)}%</li>
+     </ul>
+     `
+ }
 
 
 // Add the scatterplot
@@ -106,7 +107,8 @@ return `
           div.transition()
                .duration(100)
                .style("opacity", 1);
-          div.html(tooltip_formatter(i)).style('left', (event.pageX) + 'px').style("top", `calc(${event.pageY}px + 100vh + 10px)`);
+               event.preventDefault()
+               div.html(tooltip_formatter(i)).style("left", (event.pageX) + "px").style("top", `calc(${event.pageY}px)`);;
      })
      .on('mouseout', function (event, i) {
           d3.select(this).transition()
