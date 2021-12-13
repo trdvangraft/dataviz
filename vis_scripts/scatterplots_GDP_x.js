@@ -102,8 +102,6 @@ return `
   .attr("cx", function(d) { return x(d.GDP_Growth); })
   .attr("cy", function(d) { return y(d.Totaal_huwelijkssluitingen); })
   .on('mouseover', function (event, i) {
-      console.log(i)
-      console.log(event.pageX)
           d3.select(this).transition()
                 .duration('100')
                 .attr("r", 7);
