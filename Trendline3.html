@@ -64,7 +64,8 @@
         ));
 
         // Scale the range of the data
-        x.domain(d3.extent(data, function(d) { return d.Perioden; }));
+        // x.domain(d3.extent(data, function(d) { return d.Perioden; }));
+        x.domain([2000, 2016]);
         y.domain([0, 18000]);
 
 
@@ -106,7 +107,7 @@
         svg.append("g")
             .attr("class", "axis")
             .attr("transform", "translate(0," + height + ")")
-            .call(d3.axisBottom(x));
+            .call(d3.axisBottom(x).ticks(17));
 
         // Add the Y Axis
         svg.append("g")
