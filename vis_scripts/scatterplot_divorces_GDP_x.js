@@ -91,7 +91,6 @@ return `
     `
 }
 
-console.log(data)
 
 // Add the scatterplot
   svg.selectAll("dot")
