@@ -81,22 +81,15 @@ function scatterplots_GDP(plot_id, y_label, y_axis_label) {
             .attr("cy", function(d) { return y(d[y_label]); })
             .attr("fill", d => labelColor(d["Crisis_label"]))
             .on('mouseover', function (event, i) {
-                d3.select(this).transition()
-                        .duration('100')
-                        .attr("r", 7);
-                div.transition()
-                    .duration(100)
-                    .style("opacity", 1);
+                d3.select(this).transition().duration('250').attr('opacity', '0.85')
+                div.transition().duration(10).style("opacity", 1)
                 event.preventDefault()
-                    div.html(tooltip_formatter(i)).style("left", (event.pageX) + "px").style("top", `calc(${event.pageY}px)`);
+                div.html(tooltip_formatter(i)).style("left", (event.pageX) + "px").style("top", `calc(${event.pageY}px)`);
             })
             .on('mouseout', function (event, i) {
                 d3.select(this).transition()
-                    .duration('200')
-                    .attr("r", 5);
-                div.transition()
-                    .duration('200')
-                    .style("opacity", 0);
+                d3.select(this).transition().duration('50').attr('opacity', '1')
+                div.transition().duration(10).style("opacity", 0)
             });
 
     });
