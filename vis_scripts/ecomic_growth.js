@@ -217,18 +217,7 @@ AnimatedScatter({
     yLabel: "Growth w.r.t. base year 1995 (per year per quarter (%))",
     height: 300,
     duration: 10000 // for the intro animation; 0 to disable
-  })
-
-
-
-
-
-// var svg = d3.select("#economic_growth")
-//   .append("svg")
-//     .attr("width", width + margin.left + margin.right)
-//     .attr("height", height + margin.top + margin.bottom)
-
-
+})
 
 
 

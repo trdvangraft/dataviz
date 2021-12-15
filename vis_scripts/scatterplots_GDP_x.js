@@ -72,7 +72,6 @@ function scatterplots_GDP(plot_id, y_label, y_axis_label) {
                 `
         }
 
-
         // Add the scatterplot
         svg.selectAll("dot")
             .data(data)

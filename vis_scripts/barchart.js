@@ -39,31 +39,32 @@ function BarChart({
         // const regionsColor = d3.scaleOrdinal().range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c"]).domain(data.map(d => d.regions))
         // const keys = regionsColor.domain()
 
-        const serie = g.selectAll(".serie")
+        g.selectAll(".serie")
             .data(data)
             .enter().append("g")
             .attr("class", "serie")
-            .attr("transform", function (d) {
-                return "translate(" + xPeriod(d.period_name) + ",0)";
-            })
-            // .attr("fill", d => regionsColor(d.key));
-    
-        serie.selectAll("rect")
+            .attr("transform", d => `translate(${xPeriod(d.period_name)},0)`)
+            .selectAll("rect")
             .data(d => keys.map(key => ({key, value: d[key]})))
             .enter()
             .append("rect")
-            .attr("x", function (d) { return xLabelGroup(d.key); })
-            .attr("y", function (d) { return y(d.value); })
-            .attr("height", function (d) { return height - y(d.value); })
+            .attr("x", d => xLabelGroup(d.key))
+            .attr("y", d => y(d.value))
+            .attr("height", d => height - y(d.value))
             .attr("width", xLabelGroup.bandwidth())
-            .attr("fill", d => labelColor(d.key));
+            .attr("fill", d => labelColor(d.key))
+            .attr("opacity", "0.7")
+            .on('mouseover', function (event, i) {
+                d3.select(this).transition().duration('50').attr('opacity', '1')
+            })
+            .on('mouseout', function (event, i) {
+                d3.select(this).transition().duration('50').attr('opacity', '0.7')
+            });
 
         svg.selectAll('mydots')
             .data(keys).enter().append('circle')
             .attr('cx', width - 180).attr('cy', (d, i) => 50 + i * 25).attr('r', 7)
             .attr('fill', d => labelColor(d))
-
-        console.log(keys)
 
         svg.selectAll("mylabels")
             .data(keys).enter().append("text")
@@ -72,6 +73,9 @@ function BarChart({
             .text(d => d)
             .attr("text-anchor", "left")
             .style("alignment-baseline", "middle")
+            .on("mouseclick", function(event, i) {
+                print(d3.select(this))
+            })
 
         
         // Legend
