@@ -49,23 +49,6 @@ function AnimatedScatter({
         .attr("height", height)
         .attr("viewBox", [0, 0, width, height])
         .attr("style", "max-width: 100%; height: auto; height: intrinsic; touch-action: none; ");
-    
-    const div = d3.select("div.main").append("div")
-        .attr("class", "card")
-        .attr("style", "opacity: 0; width: 14rem; font-size: 60%")
-
-    const tooltip_formatter = (data) => {
-        return `
-            <div class="card-body">
-                <h5 class="card-title">Major events</h5>
-                <p class="card-text">Testing some new information about a major crisis</p>
-            </div>
-            <ul class="list-group list-group-flush" style="font-size: 90%">
-                <li class="list-group-item py-1">Total gdp: ${data.gdp} million</li>
-                <li class="list-group-item py-1">Gdp growth: ${parseFloat(data.growth).toFixed(2)}%</li>
-            </ul>
-        `
-    }
 
     d3.dsv(" ", "./data/GDP_NL.csv").then((data) => {
         console.info(data)
@@ -80,15 +63,36 @@ function AnimatedScatter({
     
         // Compute default domains.
         if (xDomain === undefined) xDomain = d3.nice(...d3.extent(X), width / data.length);
+        
         if (yDomain === undefined) yDomain = d3.nice(...d3.extent(Y), height / 50);
-    
+        const xPeriod = d3.scaleBand().range([0, width-220]).domain(data.map(d => d.period_name)).padding(0.2);
+        const periodColor = d3.scaleOrdinal().range(["#f00", "#0f0", "#00f"]).domain(data.map(d => d.period))
+
         // Construct scales and axes.
-        const xScale = xType(xDomain, xRange)
+        let xScale = xType(xDomain, xRange)
         const yScale = yType(yDomain, yRange);
         const xAxis = d3.axisBottom(xScale).ticks(width / data.length, xFormat);
         const yAxis = d3.axisLeft(yScale).ticks(height / 50, yFormat);
-    
-        svg.append("g")
+
+        // Define a clipping plane that obsecures items when they are out of view
+        svg.append("defs").append("svg:clipPath")
+            .attr("id", "clip")
+            .append("svg:rect")
+            .attr("transform", `translate(${margin.left},0)`)
+            .attr("width", width - marginRight - insetRight - margin.left)
+            .attr("height", height - margin.bottom)
+            .attr("x", 0)
+            .attr("y", 0)
+
+        // Add brushing
+        const brush = d3.brushX()                 
+            .extent([[margin.left,20], [width - marginRight - margin.left,height - margin.bottom]]) 
+            .on("end", updateChartBrush)
+
+        const brushArea = svg.append("g").attr("class", "brush").call(brush)
+
+        // set up the axis
+        const gx = svg.append("g")
             .attr("transform", `translate(0,${height - margin.bottom})`)
             .call(xAxis)
             .call(g => g.select(".domain").remove())
@@ -102,7 +106,7 @@ function AnimatedScatter({
                 .attr("text-anchor", "end")
                 .text(xLabel));
     
-        svg.append("g")
+        const gy = svg.append("g")
             .attr("transform", `translate(${margin.left},0)`)
             .call(yAxis)
             .call(g => g.select(".domain").remove())
@@ -117,22 +121,25 @@ function AnimatedScatter({
                 .text(yLabel));
     
         // Construct the line generator.
-        const line = d3.line()
+        let line = d3.line()
             .curve(curve)
-            .defined(i => D[i])
             .x(i => xScale(X[i]))
-            .y(i => yScale(Y[i]));
-    
+            .y(i => yScale(Y[i]))
+
+        // Define the path plot
         const path = svg.append("path")
+            .attr("clip-path", "url(#clip)")
             .attr("fill", "none")
             .attr("stroke", stroke)
             .attr("stroke-width", strokeWidth)
             .attr("stroke-linejoin", strokeLinejoin)
             .attr("stroke-linecap", strokeLinecap)
+            .data(I.filter(i => D[i]))
             .attr("d", line(I));
-    
-        svg.append("g")
-            .attr("fill", fill)
+        
+        // Overlay the path with points
+        const scatter = svg.append("g")
+            .attr("clip-path", "url(#clip)")
             .attr("stroke", stroke)
             .attr("stroke-width", strokeWidth)
             .selectAll("circle")
@@ -141,19 +148,40 @@ function AnimatedScatter({
             .attr("cx", i => xScale(X[i]))
             .attr("cy", i => yScale(Y[i]))
             .attr("r", r)
-            .on('mouseover', function (event, i) {
-                d3.select(this).transition().duration('50').attr('opacity', '0.85')
-                div.transition().duration(10).style("opacity", 1)
-                event.preventDefault()
-                console.log(event)
-                console.log(data[i])
-                div.html(tooltip_formatter(data[i])).style("left", (event.pageX) + "px").style("top", `calc(${event.pageY}px + 100vh + 10px)`)
-            })
-            .on('mouseout', function (event, i) {
-                d3.select(this).transition().duration('50').attr('opacity', '1')
-                div.transition().duration(10).style("opacity", 0)
-            });
+            .attr("fill", i => periodColor(data[i].period))
+        
+        
     
+        // A function that set idleTimeOut to null
+        var idleTimeout
+        function idled() { idleTimeout = null; }
+
+        function updateChartBrush(event) {
+            let extent = event.selection
+
+            if (!extent) {
+                if (!idleTimeout) return idleTimeout = setTimeout(idled, 350);
+                xScale = xType(xDomain, xRange)
+            } else {
+                xScale = xType([xScale.invert(extent[0]), xScale.invert(extent[1])], xRange)
+                brushArea.call(brush.move, null)
+            }
+
+            gx.transition(1000).call(d3.axisBottom(xScale))
+            svg
+                .selectAll("circle")
+                .transition(1000)
+                .attr("cx", i => xScale(X[i]))
+                .attr("cy", i => yScale(Y[i]))
+            svg
+                .selectAll("path")
+                .transition(1000)
+                .attr("d", line(I))
+            
+            animate(1)
+        }
+
+        // Line animation handling functions
         const label = svg.append("g")
             .attr("font-family", "sans-serif")
             .attr("font-size", 10)
@@ -162,49 +190,32 @@ function AnimatedScatter({
             .data(I.filter(i => D[i]))
             .join("g")
             .attr("transform", i => `translate(${xScale(X[i])},${yScale(Y[i])})`);
-    
-        if (T) label.append("text")
-            .text(i => T[i])
-            .each(function(i) {
-                const t = d3.select(this);
-                console.log(t)
-                switch (O[i]) {
-                    case "bottom": t.attr("text-anchor", "middle").attr("dy", "1.4em"); break;
-                    case "left": t.attr("dx", "-0.5em").attr("dy", "0.32em").attr("text-anchor", "end"); break;
-                    case "right": t.attr("dx", "0.5em").attr("dy", "0.32em").attr("text-anchor", "start"); break;
-                    default: t.attr("text-anchor", "middle").attr("dy", "-0.7em"); break;
-                }
-            })
-            .call(text => text.clone(true))
-            .attr("fill", "none")
-            .attr("stroke", halo)
-            .attr("stroke-width", haloWidth);
-    
+        
         // Measure the length of the given SVG path string.
         const length = path => d3.create("svg:path").attr("d", path).node().getTotalLength()
     
-        function animate() {
+        function animate(duration) {
             if (duration > 0) {
-            const l = length(line(I));
-    
-            path
-                .interrupt()
-                .attr("stroke-dasharray", `0,${l}`)
-                .transition()
-                .duration(duration)
-                .ease(d3.easeLinear)
-                .attr("stroke-dasharray", `${l},${l}`);
-    
-            label
-                .interrupt()
-                .attr("opacity", 0)
-                .transition()
-                .delay(i => length(line(I.filter(j => j <= i))) / l * (duration - 125))
-                .attr("opacity", 1);
+                const l = length(line(I));
+        
+                path
+                    .interrupt()
+                    .attr("stroke-dasharray", `0,${l}`)
+                    .transition()
+                    .duration(duration)
+                    .ease(d3.easeLinear)
+                    .attr("stroke-dasharray", `${l},${l}`);
+        
+                label
+                    .interrupt()
+                    .attr("opacity", 0)
+                    .transition()
+                    .delay(i => length(line(I.filter(j => j <= i))) / l * (duration - 125))
+                    .attr("opacity", 1);
             }    
         }
     
-        animate();
+        animate(duration);
     })
 }
 
@@ -216,7 +227,7 @@ AnimatedScatter({
     xLabel: "Date",
     yLabel: "Growth w.r.t. base year 1995 (per year per quarter (%))",
     height: 300,
-    duration: 10000 // for the intro animation; 0 to disable
+    duration: 5000 // for the intro animation; 0 to disable
 })
 
 

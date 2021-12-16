@@ -35,10 +35,6 @@ function BarChart({
         // Y axis
         const y = d3.scaleLinear().domain([0, 70000]).rangeRound([height, 0]);
 
-        // Z axis
-        // const regionsColor = d3.scaleOrdinal().range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c"]).domain(data.map(d => d.regions))
-        // const keys = regionsColor.domain()
-
         g.selectAll(".serie")
             .data(data)
             .enter().append("g")
@@ -95,36 +91,9 @@ function BarChart({
             .attr("font-weight", "bold")
             .attr("text-anchor", "start")
             .text("Population");
-        
-        // const legend = serie.append("g")
-        //     .attr("class", "legend")
-        //     .attr("transform", d => {
-        //         let dp = d[d.length - 1]
-        //         return `translate(${xPeriod(dp.data.period_name) + xLabelGroup(dp.data.label_name) + xLabelGroup.bandwidth()}, ${y(dp[0]) + y(dp[1]) / 2})`
-        //     })
-        
-        // legend.append("line")
-        //     .attr("x1", -6)
-        //     .attr("x2", 6)
-        //     .attr("stroke", "#000");
-      
-        // legend.append("text")
-        //     .attr("x", 9)
-        //     .attr("dy", "0.35em")
-        //     .attr("fill", "#000")
-        //     .style("font", "10px sans-serif")
-        //     .text(d => d.key);
-
-        
     }).catch(e => console.error(e))
 }
 
 BarChart({
     target: "#normal_divorces",
 })
-// PieChart({
-//     target: "#bank_crisis"
-// })
-// PieChart({
-//     target: "#after_bank_crisis"
-// })
