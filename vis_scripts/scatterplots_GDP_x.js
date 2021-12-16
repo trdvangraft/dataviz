@@ -26,7 +26,7 @@ function scatterplots_GDP(plot_id, y_label, y_axis_label) {
             .range([height, 0 ]);
 
         // Add period labels
-        const labelColor = d3.scaleOrdinal().range(["#98abc5", "#8a89a6", "#7b6888"]).domain(data.map(elem => elem["Crisis_label"]))
+        const labelColor = d3.scaleOrdinal().range(["blue", "red", "green"]).domain(data.map(elem => elem["Crisis_label"]))
 
         // Append X axis to graph
         svg.append("g")
