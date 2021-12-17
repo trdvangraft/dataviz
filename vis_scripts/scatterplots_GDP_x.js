@@ -13,6 +13,8 @@ function scatterplots_GDP(plot_id, y_label, y_axis_label) {
         .attr("transform",
             "translate(" + margin.left + "," + margin.top + ")");
 
+    
+
     // Get the data
     d3.dsv(",", "./data/merged_data_GDP.csv").then(data => {
         // Add X axis --> it is a date format
@@ -27,6 +29,10 @@ function scatterplots_GDP(plot_id, y_label, y_axis_label) {
 
         // Add period labels
         const labelColor = d3.scaleOrdinal().range(["blue", "red", "green"]).domain(data.map(elem => elem["Crisis_label"]))
+
+        const defined = (d, i) => !isNaN(d.GDP_Growth) && !isNaN(d[y_label]);
+        const D = d3.map(data, defined);
+        const I = d3.range(data.length);
 
         // Append X axis to graph
         svg.append("g")
@@ -91,7 +97,60 @@ function scatterplots_GDP(plot_id, y_label, y_axis_label) {
                 d3.select(this).transition().duration('50').attr('opacity', '1')
                 div.transition().duration(10).style("opacity", 0)
             });
+        
+        // Construct the line generator.
+        const line = d3.line()
+            .defined(i => D[i])
+            .x(i => x(data[i].GDP_Growth))
+            .y(i => y(data[i][y_label]))
 
+        // const lines = svg.selectAll("lines").data(data).enter().append("path").attr("d", line(data))
+
+        // Define the path plot
+        const path = svg.append("path")
+            .attr("fill", "none")
+            .attr("stroke", "black")
+            .attr("stroke-width", 2)
+            .attr("stroke-linejoin", "round")
+            .attr("stroke-linecap", "round")
+            .data(I.filter(i => D[i]))
+            .attr("d", line(I));
+
+        const label = svg.append("g")
+            .attr("font-family", "sans-serif")
+            .attr("font-size", 10)
+            .attr("stroke-linejoin", "round")
+            .selectAll("g")
+            .data(d3.range(data.length).filter(i => D[i]))
+            .join("g")
+            .attr("transform", i => `translate(${x(data[i].GDP_Growth)},${y(data[i][y_label])})`);
+        
+        const length = path => d3.create("svg:path").attr("d", path).node().getTotalLength()
+    
+        function animate(duration) {
+            if (duration > 0) {
+                const l = length(line(d3.range(data.length)));
+        
+                path
+                    .interrupt()
+                    .attr("stroke-dasharray", `0,${l}`)
+                    .transition()
+                    .duration(duration)
+                    .ease(d3.easeLinear)
+                    .attr("stroke-dasharray", `${l},${l}`);
+        
+                label
+                    .interrupt()
+                    .attr("opacity", 0)
+                    .transition()
+                    .delay(i => {
+                        length(line(d3.range(data.length).filter(j => j <= i).map(i => data[i]))) / l * (duration - 125)
+                    })
+                    .attr("opacity", 1);
+            }
+        }
+    
+        animate(10000);
     });
 }
 
