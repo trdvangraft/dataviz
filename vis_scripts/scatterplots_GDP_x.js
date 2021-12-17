@@ -28,7 +28,7 @@ function scatterplots_GDP(plot_id, y_label, y_axis_label) {
             .range([height, 0 ]);
 
         // Add period labels
-        const labelColor = d3.scaleOrdinal().range(["blue", "red", "green"]).domain(data.map(elem => elem["Crisis_label"]))
+        const labelColor = d3.scaleOrdinal().range(["red", "green", "blue"]).domain(data.map(elem => elem["Crisis_label"]))
 
         const defined = (d, i) => !isNaN(d.GDP_Growth) && !isNaN(d[y_label]);
         const D = d3.map(data, defined);
