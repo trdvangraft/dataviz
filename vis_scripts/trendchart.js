@@ -17,7 +17,7 @@ function trendline() {
                 "translate(" + margin.left + "," + margin.top + ")");
 
     //Read the data.
-    d3.csv("data/data_Ruben/Huwen_en_huwelijksontbinding__geslacht__leeftijd__31_december___regio_05122021_231200.csv").then(data => {
+    d3.csv("data/Huwen_en_huwelijksontbinding__geslacht__leeftijd__31_december___regio_05122021_231200.csv").then(data => {
         Load_data = data
         
         Region = Load_data.flatMap(elem => elem['Regio'])
